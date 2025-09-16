@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import authService from "../services/authService";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import Loading from "../utils/Loading";
 
 const Login = () => {
   const [data, setData] = useState({
@@ -10,6 +11,7 @@ const Login = () => {
   });
 
   const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const validateEmail = (email) => {
@@ -51,6 +53,7 @@ const Login = () => {
     e.preventDefault();
 
     if (validateForm()) {
+      setIsLoading(true);
       try {
         const response = await authService.login(data);
         if (response.status === "success") {
@@ -66,9 +69,14 @@ const Login = () => {
       } catch (error) {
         console.error("Login error:", error);
         toast.error(error.message || "An unexpected error occurred");
+      } finally {
+        setIsLoading(false);
       }
     }
   };
+  if (isLoading) {
+    return <Loading />;
+  }
   return (
     <>
       <div className="flex h-[90vh] flex-col justify-center bg-amber-100 py-12 sm:px-6 lg:px-8">

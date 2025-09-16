@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import authService from "../services/authService";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import Loading from "../utils/Loading";
 
 const Register = () => {
   const [data, setData] = useState({
@@ -12,6 +13,7 @@ const Register = () => {
   });
 
   const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const validateEmail = (email) => {
@@ -63,14 +65,15 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (validateForm()) {
+      setIsLoading(true);
       try {
         const response = await authService.register(data);
         // console.log(response);
         if (response.status === "success") {
           navigate("/login");
           toast.success(response.message || "Registration successful!");
+          setIsLoading(false);
           setData({
             name: "",
             email: "",
@@ -83,9 +86,15 @@ const Register = () => {
       } catch (error) {
         console.error("Registration error:", error);
         toast.error(error.message || "An unexpected error occurred");
+      } finally {
+        setIsLoading(false);
       }
     }
   };
+
+  if (isLoading) {
+    return <Loading />;
+  }
 
   return (
     <>
@@ -190,7 +199,8 @@ const Register = () => {
               <div>
                 <button
                   type="submit"
-                  className="flex w-full mt-4 justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                  className="flex w-full mt-4 justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                  disabled={isLoading}>
                   Sign Up
                 </button>
               </div>
