@@ -3,15 +3,21 @@ import authService from "../services/authService";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Loading from "../utils/Loading";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  loginStart,
+  loginSuccess,
+  loginFailure,
+} from "../redux/auth/authSlice";
 
 const Login = () => {
   const [data, setData] = useState({
     email: "",
     password: "",
   });
-
   const [errors, setErrors] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
+  const { loading } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const validateEmail = (email) => {
@@ -51,32 +57,27 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateForm()) return;
 
-    if (validateForm()) {
-      setIsLoading(true);
-      try {
-        const response = await authService.login(data);
-        if (response.status === "success") {
-          navigate("/");
-          toast.success(response.message || "Login successful!");
-          setData({
-            email: "",
-            password: "",
-          });
-        } else {
-          throw new Error("Unexpected response status");
-        }
-      } catch (error) {
-        console.error("Login error:", error);
-        toast.error(error.message || "An unexpected error occurred");
-      } finally {
-        setIsLoading(false);
+    dispatch(loginStart());
+    try {
+      const response = await authService.login(data);
+      console.log("Login response:", response);
+      if (response.status === "success") {
+        dispatch(loginSuccess(response.data.user));
+        toast.success(response.message || "Login successful!");
+        navigate("/");
+        setData({ email: "", password: "" });
+      } else {
+        throw new Error("Unexpected response status");
       }
+    } catch (error) {
+      console.error("Login error:", error);
+      dispatch(loginFailure(error.message));
+      toast.error(error.message || "An unexpected error occurred");
     }
   };
-  if (isLoading) {
-    return <Loading />;
-  }
+  if (loading) return <Loading />;
   return (
     <>
       <div className="flex h-[90vh] flex-col justify-center bg-amber-100 py-12 sm:px-6 lg:px-8">
@@ -89,6 +90,7 @@ const Login = () => {
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]">
           <div className="bg-white px-6 py-12 shadow-sm sm:rounded-lg sm:px-12">
             <form className="space-y-2" onSubmit={handleSubmit}>
+              {/* Email */}
               <div>
                 <label
                   htmlFor="email"
@@ -109,7 +111,7 @@ const Login = () => {
                   )}
                 </div>
               </div>
-
+              {/* Password */}
               <div>
                 <label
                   htmlFor="password"
@@ -132,12 +134,12 @@ const Login = () => {
                   )}
                 </div>
               </div>
-
+              {/* Submit */}
               <div>
                 <button
                   type="submit"
                   className="flex w-full mt-4 justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-                  Sign In
+                  {loading ? "Signing in..." : "Sign In"}
                 </button>
               </div>
             </form>
