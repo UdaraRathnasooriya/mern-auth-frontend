@@ -68,14 +68,18 @@ const Register = () => {
       try {
         const response = await authService.register(data);
         // console.log(response);
-        toast.success("Registration successful!");
-        // ✅ clear form fields
-        setData({
-          name: "",
-          email: "",
-          password: "",
-          confirmPassword: "",
-        });
+        if (response.status === "success") {
+          navigate("/login");
+          toast.success(response.message || "Registration successful!");
+          setData({
+            name: "",
+            email: "",
+            password: "",
+            confirmPassword: "",
+          });
+        } else {
+          throw new Error("Unexpected response status");
+        }
       } catch (error) {
         console.error("Registration error:", error);
         toast.error(error.message || "An unexpected error occurred");
@@ -94,7 +98,6 @@ const Register = () => {
 
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]">
           <div className="bg-white px-6 py-12 shadow-sm sm:rounded-lg sm:px-12">
-           
             <form className="space-y-2" onSubmit={handleSubmit}>
               <div>
                 <label
