@@ -88,8 +88,18 @@ const Register = () => {
         throw new Error("Unexpected response status");
       }
     } catch (error) {
-      dispatch(signUpFailure(error.message));
-      toast.error(error.message || "An unexpected error occurred");
+      console.log("Registration error:", error);
+
+      if (error.errors) {
+        // Backend validation errors array
+        error.errors.forEach((err) => toast.error(err.msg));
+      } else if (error.message) {
+        toast.error(error.message);
+      } else {
+        toast.error("An unexpected error occurred");
+      }
+
+      dispatch(signUpFailure(error.message || "Signup failed"));
     }
   };
 

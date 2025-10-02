@@ -13,10 +13,12 @@ const authService = {
       return response; // Return raw response
     } catch (error) {
       console.error("Error in authService:", error);
-      const errMessage =
-        error.response?.data?.message ||
-        "Registration failed. Please try again.";
-      throw new Error(errMessage);
+      // Instead of collapsing into Error(), return raw backend response if available
+      if (error.response?.data) {
+        throw error.response.data; // <-- important change
+      }
+      // fallback for unexpected issues
+      throw { message: "Registration failed. Please try again." };
     }
   },
 
