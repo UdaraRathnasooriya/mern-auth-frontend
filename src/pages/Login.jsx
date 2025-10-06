@@ -67,7 +67,7 @@ const Login = () => {
       if (response.status === "success") {
         dispatch(loginSuccess(response.data.user));
         toast.success(response.message || "Login successful!");
-        navigate("/");
+        navigate("/profile");
         setData({ email: "", password: "" });
       } else {
         throw new Error("Unexpected response status");
