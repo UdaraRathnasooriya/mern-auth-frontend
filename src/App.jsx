@@ -7,6 +7,7 @@ import About from "./pages/About";
 import Header from "./compoennts/Header";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import PrivateRoute from "./compoennts/PrivateRoute";
 
 function App() {
   return (
@@ -17,13 +18,15 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/profile" element={<Profile />} />
+          <Route element={<PrivateRoute />}>
+            <Route path="/profile" element={<Profile />} />
+          </Route>
           <Route path="/about" element={<About />} />
         </Routes>
       </BrowserRouter>
       <ToastContainer
         position="bottom-right"
-        autoClose={2000} // 2 seconds
+        autoClose={3000} // 2 seconds
         hideProgressBar={false}
         newestOnTop={true}
         closeOnClick

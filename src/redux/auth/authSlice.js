@@ -1,9 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { REHYDRATE } from "redux-persist";
 
 const initialState = {
   currentUser: null,
   loading: false,
   error: null,
+  isHydrated: false,
 };
 
 const authSlice = createSlice({
@@ -36,6 +38,15 @@ const authSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(REHYDRATE, (state, action) => {
+      // Merge rehydrated auth state (persistReducer already does this, but we set the flag)
+      if (action.payload?.auth) {
+        state.currentUser = action.payload.auth.currentUser;
+      }
+      state.isHydrated = true; // Set flag once rehydrated
+    });
   },
 });
 

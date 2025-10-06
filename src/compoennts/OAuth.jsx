@@ -14,7 +14,7 @@ const OAuth = () => {
       if (response.status === "success") {
         dispatch(loginSuccess(response.data.user));
         toast.success(response.message || "Login successful!");
-        navigate("/");
+        navigate("/profile");
       } else {
         throw new Error("Unexpected response status");
       }
