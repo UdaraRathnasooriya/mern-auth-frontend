@@ -1,24 +1,34 @@
-import React, { useEffect , useState } from "react";
-import { useSelector } from "react-redux";
+import React, { useEffect, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { Navigate } from "react-router-dom";
+import userService from "../services/userService";
+import {
+  profileUpdateStart,
+  profileUpdateSuccess,
+  profileUpdateFailure,
+} from "../redux/auth/authSlice";
+import { toast } from "react-toastify";
+import Loading from "../utils/Loading";
 
 const Profile = () => {
   const { currentUser } = useSelector((state) => state.auth);
-  console.log("Profile - currentUser:", currentUser);
+  const dispatch = useDispatch();
+  // console.log("Profile - currentUser:", currentUser);
 
   const [formData, setFormData] = React.useState({
     name: currentUser?.name || "",
     email: currentUser?.email || "",
-    password: "",
+    // password: "",
   });
   const [errors, setErrors] = useState({});
+  const { loading } = useSelector((state) => state.auth);
 
   useEffect(() => {
     if (currentUser) {
       setFormData({
         name: currentUser.name,
         email: currentUser.email,
-        password: "",
+        // password: "",
       });
     }
   }, [currentUser]);
@@ -39,15 +49,15 @@ const Profile = () => {
     else if (!/\S+@\S+\.\S+/.test(formData.email))
       newErrors.email = "Email is invalid";
     // Password validation: Required for local auth, optional for others (but shown only for local)
-    if (currentUser?.authProvider === "local") {
-      if (!formData.password.trim()) {
-        newErrors.password = "Password is required for local authentication";
-      } else if (formData.password.length < 4) {
-        newErrors.password = "Password must be at least 4 characters";
-      }
-    } else if (formData.password && formData.password.length < 4) {
-      newErrors.password = "Password must be at least 4 characters";
-    }
+    // if (currentUser?.authProvider === "local") {
+    //   if (!formData.password.trim()) {
+    //     newErrors.password = "Password is required for local authentication";
+    //   } else if (formData.password.length < 4) {
+    //     newErrors.password = "Password must be at least 4 characters";
+    //   }
+    // } else if (formData.password && formData.password.length < 4) {
+    //   newErrors.password = "Password must be at least 4 characters";
+    // }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -57,7 +67,21 @@ const Profile = () => {
     if (!validateForm()) return;
 
     // Submit updated profile data
-    console.log("Submitting profile update:", formData);
+    // console.log("Submitting profile update:", formData);
+    dispatch(profileUpdateStart());
+    try {
+      const response = await userService.updateUser(formData);
+      if (response.status === "success") {
+        dispatch(profileUpdateSuccess(response.data.user));
+        toast.success(response.message || "User Update successful!");
+      } else {
+        throw new Error("Unexpected response status");
+      }
+    } catch (error) {
+      console.error("Profile update error:", error);
+      dispatch(profileUpdateFailure(error.message));
+      toast.error(error.message || "Profile update failed");
+    }
   };
 
   // For Google auth, disable email (non-editable)
@@ -67,6 +91,7 @@ const Profile = () => {
   if (!currentUser) {
     return <Navigate to="/login" />;
   }
+  if (loading) return <Loading />;
   return (
     <>
       <div className="flex h-[90vh] flex-col justify-center bg-amber-100 py-12 sm:px-6 lg:px-8">
@@ -128,7 +153,7 @@ const Profile = () => {
                 </div>
               </div>
               {/* Password */}
-              {currentUser?.authProvider === "local" && (
+              {/* {currentUser?.authProvider === "local" && (
                 <div>
                   <label
                     htmlFor="password"
@@ -146,13 +171,13 @@ const Profile = () => {
                       placeholder="********"
                     />
                     {errors.password && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors.password}
-                    </p>
-                  )}
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.password}
+                      </p>
+                    )}
                   </div>
                 </div>
-              )}
+              )} */}
 
               {/* Submit */}
               <div>
