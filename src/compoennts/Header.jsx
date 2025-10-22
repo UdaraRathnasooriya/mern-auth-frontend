@@ -9,7 +9,7 @@ const navigation = [
 
 const Header = () => {
   const { currentUser } = useSelector((state) => state.auth);
-  console.log("Current User in Header:", currentUser);
+  // console.log("Current User in Header:", currentUser);
   return (
     <header className="bg-amber-500 h-[10vh]">
       <nav aria-label="Top" className="mx-auto max-w-7xl h-full">

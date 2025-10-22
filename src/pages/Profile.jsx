@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Navigate } from "react-router-dom";
 import userService from "../services/userService";
@@ -11,9 +11,9 @@ import { toast } from "react-toastify";
 import Loading from "../utils/Loading";
 
 const Profile = () => {
-  const { currentUser } = useSelector((state) => state.auth);
+  const { currentUser, loading } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
-  // console.log("Profile - currentUser:", currentUser);
+  console.log("Profile - currentUser:", currentUser);
 
   const [formData, setFormData] = React.useState({
     name: currentUser?.name || "",
@@ -21,17 +21,6 @@ const Profile = () => {
     // password: "",
   });
   const [errors, setErrors] = useState({});
-  const { loading } = useSelector((state) => state.auth);
-
-  useEffect(() => {
-    if (currentUser) {
-      setFormData({
-        name: currentUser.name,
-        email: currentUser.email,
-        // password: "",
-      });
-    }
-  }, [currentUser]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
