@@ -1,5 +1,10 @@
 import apiService from "./apiService";
-import { GoogleAuthProvider, signInWithPopup, getAuth } from "firebase/auth";
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
+  getAuth,
+  signOut,
+} from "firebase/auth";
 import { app } from "../utils/firebase";
 
 const authService = {
@@ -66,6 +71,19 @@ const authService = {
       const errMessage =
         error.response?.data?.message ||
         "Google login failed. Please try again.";
+      throw new Error(errMessage);
+    }
+  },
+  signOut: async () => {
+    try {
+      const response = await apiService.post("/auth/signout");
+      if (response.status !== "success") {
+        throw new Error(response.message || "Sign out failed");
+      }
+    } catch (error) {
+      console.error("Error in authService:", error);
+      const errMessage =
+        error.response?.data?.message || "Logout Failed!. Please try again.";
       throw new Error(errMessage);
     }
   },
