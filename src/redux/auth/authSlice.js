@@ -51,6 +51,19 @@ const authSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
+    signOutStart: (state) => {
+      state.loading = true;
+      state.error = null;
+    },
+    signOutSuccess: (state) => {
+      state.loading = false;  
+      state.currentUser = null;
+      state.error = null;
+    },
+    signOutFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(REHYDRATE, (state, action) => {
@@ -73,5 +86,8 @@ export const {
   profileUpdateStart,
   profileUpdateSuccess,
   profileUpdateFailure,
+  signOutStart,
+  signOutSuccess,
+  signOutFailure,
 } = authSlice.actions;
 export default authSlice.reducer;

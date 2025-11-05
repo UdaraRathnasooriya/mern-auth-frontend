@@ -2,18 +2,23 @@ import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Navigate } from "react-router-dom";
 import userService from "../services/userService";
+import authService from "../services/authService";
 import {
   profileUpdateStart,
   profileUpdateSuccess,
   profileUpdateFailure,
+  signOutStart,
+  signOutSuccess,
+  signOutFailure,
 } from "../redux/auth/authSlice";
 import { toast } from "react-toastify";
 import Loading from "../utils/Loading";
+import ConfirmModal from "../compoennts/ConfirmModal";
 
 const Profile = () => {
   const { currentUser, loading } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
-  console.log("Profile - currentUser:", currentUser);
+  // console.log("Profile - currentUser:", currentUser);
 
   const [formData, setFormData] = React.useState({
     name: currentUser?.name || "",
@@ -21,6 +26,7 @@ const Profile = () => {
     // password: "",
   });
   const [errors, setErrors] = useState({});
+  const [isSignOutModalOpen, setIsSignOutModalOpen] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -70,6 +76,21 @@ const Profile = () => {
       console.error("Profile update error:", error);
       dispatch(profileUpdateFailure(error.message));
       toast.error(error.message || "Profile update failed");
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      dispatch(signOutStart());
+      await authService.signOut();
+      dispatch(signOutSuccess());
+      toast.success("Signed out successfully");
+    } catch (err) {
+      console.error("SignOut error:", err);
+      dispatch(signOutFailure(err.message));
+      toast.error(err.message || "Failed to sign out");
+    } finally {
+      setIsSignOutModalOpen(false);
     }
   };
 
@@ -181,10 +202,19 @@ const Profile = () => {
               <button className="bg-red-500 px-4 py-2 rounded-md text-white hover:bg-red-600 text-sm">
                 Delete Account
               </button>
-              <button className="bg-red-500 px-4 py-2 rounded-md text-white hover:bg-red-600 text-sm">
+              <button
+                className="bg-red-500 px-4 py-2 rounded-md text-white hover:bg-red-600 text-sm"
+                onClick={() => setIsSignOutModalOpen(true)}>
                 Sign Out
               </button>
             </div>
+            <ConfirmModal
+              title={"Do you want to sign out?"}
+              isOpen={isSignOutModalOpen}
+              onClose={() => setIsSignOutModalOpen(false)}
+              btnTitle={"Sign Out"}
+              onConfirm={handleSignOut}
+            />
           </div>
         </div>
       </div>
